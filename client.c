@@ -1,8 +1,33 @@
 #include "skip_list.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <readline/readline.h>
-#include <readline/history.h>
+#include <string.h>
+
+typedef struct {
+  char *command;
+  void (*func) (skipList*, int);
+} entry_t;
+
+entry_t table[] = {{"put", insert}, 
+                   {"get", search}};
+
+void parse(skipList *list, char *cmd_line) {
+  char *cmd = strtok_r(cmd_line, " ");
+  if (cmd == NULL) return;
+  char *key = strtok_r(NULL, " ");
+  if (key == NULL) return;
+  
+  int i = sizeof(table)/sizeof(entry_t);
+  while (--i) {
+    if (!strcasecmp(table[i].command, cmd)) {
+      int arg;
+      sscanf(key, "%d", &arg);
+      table[i].func(list, arg);
+      return;
+    }
+  }
+}
+
 
 int main() {
   int arr[] = {1, 2, 3, 4, 5};
@@ -14,12 +39,8 @@ int main() {
     insert(list, arr[i]); 
   }
   
-  print_skiplist(list);
-
-  if (search(list, 8) == FOUND) {
-    printf("found 3 in the skiplist\n");
-  } else {
-    printf("3 is missed\n");
+  while (1) {
+    char cmd[200];
+    parse(list, fgets(cmd, 200, stdin));
   }
-  
 }

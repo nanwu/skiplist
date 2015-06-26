@@ -12,21 +12,23 @@ void print_skiplist(skipList *list) {
   } 
 }
 
-int search(skipList *list, int target) {
+int search(skipList *list, int arg) {
   skipListNode *cur_node = list->header;
   int level = SKIPLIST_MAX_LEVEL;
 
   while (level >= 0) {
     int next_value = cur_node->forward[level]->value;
-    if (next_value == target) {
+    if (next_value == arg) {
+      printf("%d in the skiplist\n", arg);
       return FOUND;
-    } else if (next_value > target) {
+    } else if (next_value > arg) {
       --level;
     } else {
         cur_node = cur_node->forward[level];
     }
   }
   
+  printf("%d not in skiplist\n", arg);
   return MISSED;
 }
 
@@ -45,6 +47,7 @@ void skiplist_init(skipList *list) {
       printf("put forward on level %d\n", i);
     }
   }
+  
 }
 
 
@@ -68,6 +71,8 @@ void insert(skipList *list, int new_value) {
      to_be_updated[level]->forward[level] = new_node;
      new_node->forward[level] = forward;
   } 
+
+  printf("put %d into skiplist\n", new_value);
 }
 
 int insertion_level() {
