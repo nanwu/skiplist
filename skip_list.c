@@ -53,7 +53,6 @@ void skiplist_init(skipList *list) {
 
 void insert(skipList *list, int new_value) {
   skipListNode *to_be_updated[SKIPLIST_MAX_LEVEL+1];
-
   skipListNode *cur_node = list->header;
   for (int i = SKIPLIST_MAX_LEVEL; i >= 0; --i) {
     while (cur_node->forward[i]->value <= new_value)
@@ -71,8 +70,6 @@ void insert(skipList *list, int new_value) {
      to_be_updated[level]->forward[level] = new_node;
      new_node->forward[level] = forward;
   } 
-
-  printf("put %d into skiplist\n", new_value);
 }
 
 int insertion_level() {

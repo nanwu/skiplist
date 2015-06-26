@@ -3,28 +3,51 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define FUNC_TYPE1 1
+#define FUNC_TYPE2 2
+#define FUNC_TYPE3 3
+
 typedef struct {
   char *command;
-  void (*func) (skipList*, int);
+  int func_type;
+  union {
+    int (*func1) (skipList*, int);
+    void (*func2) (skipList*, int);
+    void (*func3) (skipList*);
+  } skipList_func;
 } entry_t;
 
-entry_t table[] = {{"put", insert}, 
-                   {"get", search}};
+entry_t table[] = {{"put", 2, .skipList_func.func2 = insert}, 
+                   {"get", 1, .skipList_func.func1 = search},
+                   {"print", 3, .skipList_func.func3 = print_skiplist}};
 
 void parse(skipList *list, char *cmd_line) {
-  char *cmd = strtok_r(cmd_line, " ");
+  char *newline = strchr(cmd_line, '\n');
+  if (newline)
+    *newline = 0;
+
+  char *cmd = strtok(cmd_line, " ");
   if (cmd == NULL) return;
-  char *key = strtok_r(NULL, " ");
-  if (key == NULL) return;
-  
-  int i = sizeof(table)/sizeof(entry_t);
-  while (--i) {
+  char *key = strtok(NULL, " ");
+
+  int i = sizeof(table)/sizeof(entry_t) - 1;
+  while (i >= 0) {
     if (!strcasecmp(table[i].command, cmd)) {
       int arg;
-      sscanf(key, "%d", &arg);
-      table[i].func(list, arg);
+      if (key)
+        sscanf(key, "%d", &arg);
+
+      if (table[i].func_type == FUNC_TYPE1) {
+        table[i].skipList_func.func1(list, arg);
+      } else if (table[i].func_type == FUNC_TYPE2) {
+        table[i].skipList_func.func2(list, arg);
+      } else if (table[i].func_type == FUNC_TYPE3) {
+        table[i].skipList_func.func3(list);
+      }
+
       return;
     }
+    --i;
   }
 }
 
@@ -40,6 +63,7 @@ int main() {
   }
   
   while (1) {
+    printf("> ");
     char cmd[200];
     parse(list, fgets(cmd, 200, stdin));
   }
