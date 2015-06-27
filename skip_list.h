@@ -7,6 +7,7 @@
 #define SKIPLIST_MAX_LEVEL 10
 #define MISSED -1
 #define FOUND 0
+#define REMOVED 1
 
 typedef struct skipListNode {
   size_t level;
@@ -23,5 +24,5 @@ int search(skipList *list, int taget);
 void print_skiplist(skipList *list); 
 void insert(skipList *list, int new_val);
 void skiplist_init(skipList *list);
-
+void remove_node(skipList *list, int key);
 #endif

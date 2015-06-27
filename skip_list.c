@@ -12,6 +12,32 @@ void print_skiplist(skipList *list) {
   } 
 }
 
+void remove_node(skipList *list, int key) {
+  skipListNode* cur_node = list->header;
+  skipListNode* to_be_removed = NULL;
+
+  int i = SKIPLIST_MAX_LEVEL;
+  while (i >= 0) {
+    int next_value = cur_node->forward[i]->value;
+    if (next_value == key) {
+      if (!to_be_removed) to_be_removed = cur_node->forward[i];
+      cur_node->forward[i] = cur_node->forward[i]->forward[i];
+      i -= 1;
+    } else if (next_value > key) {
+      i -= 1;
+    } else {
+      cur_node = cur_node->forward[i]; 
+    }
+  }
+  
+  if (to_be_removed) {
+    free(to_be_removed);
+  } else {
+    printf("%d not found.", key);
+  }
+
+}
+
 int search(skipList *list, int arg) {
   skipListNode *cur_node = list->header;
   int level = SKIPLIST_MAX_LEVEL;

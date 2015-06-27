@@ -19,14 +19,11 @@ typedef struct {
 
 entry_t table[] = {{"put", 2, .skipList_func.func2 = insert}, 
                    {"get", 1, .skipList_func.func1 = search},
+                   {"delete", 2, .skipList_func.func2 = remove_node},
                    {"print", 3, .skipList_func.func3 = print_skiplist}};
 
 void parse(skipList *list, char *cmd_line) {
-  char *newline = strchr(cmd_line, '\n');
-  if (newline)
-    *newline = 0;
-
-  char *cmd = strtok(cmd_line, " ");
+  char *cmd = strtok(cmd_line, " \n");
   if (cmd == NULL) return;
   char *key = strtok(NULL, " ");
 
