@@ -2,10 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 #define FUNC_TYPE1 1
 #define FUNC_TYPE2 2
 #define FUNC_TYPE3 3
+
+#define OUT_OF_LOOP -1
+#define CONTINUE_LOOP 0
 
 typedef struct {
   char *command;
@@ -20,11 +24,12 @@ typedef struct {
 entry_t table[] = {{"put", 2, .skipList_func.func2 = insert}, 
                    {"get", 1, .skipList_func.func1 = search},
                    {"delete", 2, .skipList_func.func2 = remove_node},
-                   {"print", 3, .skipList_func.func3 = print_skiplist}};
+                   {"print", 3, .skipList_func.func3 = print_skiplist},
+                   {"quit", 3, .skipList_func.func3 = free_skiplist}};
 
-void parse(skipList *list, char *cmd_line) {
+int parse(skipList *list, char *cmd_line) {
   char *cmd = strtok(cmd_line, " \n");
-  if (cmd == NULL) return;
+  if (cmd == NULL) return 0;
   char *key = strtok(NULL, " ");
 
   int i = sizeof(table)/sizeof(entry_t) - 1;
@@ -41,27 +46,49 @@ void parse(skipList *list, char *cmd_line) {
       } else if (table[i].func_type == FUNC_TYPE3) {
         table[i].skipList_func.func3(list);
       }
-
-      return;
+      
+      if (!strcasecmp("quit", cmd)) {
+        return OUT_OF_LOOP;
+      } else {
+        return CONTINUE_LOOP;
+      }
     }
     --i;
   }
 }
 
+skipList *list;
+
+void sigint_handler(int signo) {
+  if (signo == SIGINT) {
+    printf("\nreceive SIGINT signal\n");
+    if (list) {      // check if the skiplist is freed or not
+      free_skiplist(list);
+    }
+    exit(0);
+  }  
+
+}
 
 int main() {
+  
   int arr[] = {1, 2, 3, 4, 5};
-  skipList *list = (skipList *)malloc(sizeof(skipList));
+  list = (skipList *)malloc(sizeof(skipList));
   skiplist_init(list);
 
   printf("Inserting: ----------------\n");
   for (int i = 0; i < sizeof(arr)/sizeof(int); ++i) {
     insert(list, arr[i]); 
   }
-  
+
+  if (signal(SIGINT, sigint_handler) == SIG_ERR)
+    printf("can't handle the signal\n");
+
   while (1) {
     printf("> ");
     char cmd[200];
-    parse(list, fgets(cmd, 200, stdin));
+    if (OUT_OF_LOOP == parse(list, fgets(cmd, 200, stdin))) break;
   }
+
+  return 0;
 }

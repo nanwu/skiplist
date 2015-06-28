@@ -25,4 +25,5 @@ void print_skiplist(skipList *list);
 void insert(skipList *list, int new_val);
 void skiplist_init(skipList *list);
 void remove_node(skipList *list, int key);
+void free_skiplist(skipList *list);
 #endif

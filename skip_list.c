@@ -1,5 +1,6 @@
 #include "skip_list.h"
 #include <limits.h>
+#include <signal.h>
 
 void print_skiplist(skipList *list) {
   for (int i = SKIPLIST_MAX_LEVEL; i >= 0;  --i) {
@@ -36,6 +37,20 @@ void remove_node(skipList *list, int key) {
     printf("%d not found.", key);
   }
 
+}
+
+void free_skiplist(skipList *list) {
+  skipListNode *cur_node = list->header->forward[0];
+  list->header->forward[0] = NULL;
+
+  while (cur_node) {
+    skipListNode *tmp = cur_node->forward[0];
+    free(cur_node);
+    cur_node = tmp;
+  }
+
+  free(list);
+  printf("Removed the skiplist\n");
 }
 
 int search(skipList *list, int arg) {
